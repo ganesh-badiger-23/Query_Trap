@@ -1,0 +1,310 @@
+================================================================================
+   SENTINEL DB & QUERY TRAP — QUICK RUN COMMANDS & DEMO QUERIES CHEAT SHEET
+   (Zero Theory · Actionable Commands, Steps & Queries Only)
+================================================================================
+
+[STEP 1] START THE PROJECT (ONE COMMAND)
+--------------------------------------------------------------------------------
+Open terminal in project folder (d:\Projects\Query_Trap) and run:
+
+   python run.py
+
+Wait until you see:
+"ALL 3 DEMO SERVICES ARE RUNNING AND READY!"
+
+--------------------------------------------------------------------------------
+[STEP 2] OPEN 4 BROWSER TABS
+--------------------------------------------------------------------------------
+Tab 1 (SOC Telemetry)   : http://127.0.0.1:3000/  (or http://127.0.0.1:3000/?token=soc_token_live_2026)
+                          Credentials : Username = admin | Password = sentinel_sec_2026
+Tab 2 (Storefront)      : http://127.0.0.1:5200/
+Tab 3 (Honeypot Decoy)  : http://127.0.0.1:5300/
+Tab 4 (DB Tables View)  : http://127.0.0.1:3000/api/db/inspect?token=soc_token_live_2026
+
+Tip: Put Tab 2 (Storefront) on Left half of screen, Tab 1 (SOC) on Right half.
+Tip: On Tab 1 (SOC Dashboard :3000), security analysts can use the Filter Toolbar:
+     - Click "🛍️ Product Searches" to isolate legitimate customer searches (e.g. notebook, lamp).
+     - Click "🚨 Attacks Diverted" to isolate attacks.
+     - Type in the Search Box (e.g., "notebook", "users", "port") to filter in real-time.
+     - Click any row in the table to open the full SOC Audit Inspection Dialog!
+     - Click "⬇ Export JSON" to download the entire audit stream for SIEM analysis.
+
+--------------------------------------------------------------------------------
+[STEP 3] EXECUTION STEPS & QUERIES (PASTE INTO TAB 2 ADDRESS BAR OR SEARCH BAR)
+--------------------------------------------------------------------------------
+STEALTH DECEPTION NOTE:
+The honeypot (:5300) presents as an authentic corporate internal database hub
+("Northstar Enterprise Data Systems"). All giveaway banners ("SYNTHETIC HONEYPOT
+DATA", "CANARY ACTIVE", "Workspace replica", and "[FLAGGED: SQLi]") have been
+completely eliminated. To the attacker, their injection query appears to have
+genuinely succeeded in dumping confidential company records!
+
+---
+
+1. SAFE SEARCH (NORMAL BASELINE)
+   URL to paste:
+   http://127.0.0.1:5200/?q=notebook
+
+   Expected Result:
+   - HTTP 200 OK (Stays on Storefront)
+   - Storefront renders: "Field notebook (Grid A5)" product card
+   - Database Accessed: production.db [Catalog] (Real SQLite Database)
+   - SOC Dashboard (:3000) logs:
+     * Classification: "🛍️ Product Catalog Search"
+     * Database: "🟢 production.db"
+     * Risk Score: 10 (SAFE)
+     * Action: "200 OK (Store Catalog)"
+
+---
+
+2. SQLi TAUTOLOGY ATTACK (AUTH / FILTER BYPASS) — [PRIMARY DEMO]
+   URL to paste:
+   http://127.0.0.1:5200/?q=' OR '1'='1
+
+   Expected Result:
+   - HTTP 302 Transparent Redirect to Honeypot (:5300)
+   - Honeypot serves: Realistic corporate hardware assets (CANARY-HW-XXXX)
+   - Honeypot Query Box: Shows realistic execution "SELECT * FROM public_catalog WHERE item = '' OR '1'='1'; -- (Extracted query)"
+   - Storefront shows NO error banner (100% stealth)
+   - SOC Dashboard (:3000) logs:
+     * Classification: "💉 SQLi · Tautology Bypass ('1'='1)"
+     * Database: "🟠 honeypot.db / Canary Store"
+     * Risk Score: 65 (SUSPICIOUS)
+     * Action: "302 Honeypot Redirect"
+
+---
+
+3. CREDENTIAL HARVESTING (USER / ADMIN ACCOUNT DUMP)
+   URL to paste:
+   http://127.0.0.1:5200/?q=SELECT * FROM users
+
+   Expected Result:
+   - HTTP 302 Redirect to Honeypot (:5300)
+   - Honeypot serves: Authentic-looking admin accounts with Argon2id password hashes (sys_admin_shadow, ops_vault_lead)
+   - Click "Cloud Infrastructure Secrets" tab on Honeypot to show decoy AWS & JWT keys
+   - SOC Dashboard (:3000) logs:
+     * Classification: "🚨 Credential Exfiltration (users table)"
+     * Database: "🟠 honeypot.db / Canary Store"
+     * Risk Score: 40 (SUSPICIOUS)
+     * Action: "302 Honeypot Redirect"
+
+---
+
+4. UNAUTHORIZED PORT PROBE / RECONNAISSANCE
+   URL to paste:
+   http://127.0.0.1:5200/?port=5100
+
+   Expected Result:
+   - HTTP 302 Redirect to Honeypot (:5300)
+   - Deflects port scan away from internal SOC port 3000
+   - SOC Dashboard (:3000) logs:
+     * Classification: "🛡️ Port Reconnaissance Probe"
+     * Database: "🟠 honeypot.db / Canary Store"
+     * Risk Score: 50 (SUSPICIOUS)
+     * Action: "302 Honeypot Redirect"
+
+---
+
+5. FINANCIAL DATA EXFILTRATION (OFFSHORE LEDGER TARGET)
+   URL to paste:
+   http://127.0.0.1:5200/?q=SELECT * FROM financial_records WHERE balance > 1000
+
+   Expected Result:
+   - HTTP 302 Redirect to Honeypot (:5300)
+   - Honeypot serves: Fake SWIFT/IBAN accounts and decoy multi-million balances ($4.8M, €3.9M)
+   - SOC Dashboard (:3000) logs:
+     * Classification: "💰 Financial Exfiltration (ledger)"
+     * Database: "🟠 honeypot.db / Canary Store"
+     * Risk Score: 40 (SUSPICIOUS)
+     * Action: "302 Honeypot Redirect"
+
+---
+
+6. UNION SELECT ATTACK (DATA LEAK PROBE)
+   URL to paste:
+   http://127.0.0.1:5200/?q=1 UNION SELECT null, null, null--
+
+   Expected Result:
+   - HTTP 302 Redirect to Honeypot (:5300)
+   - SOC Dashboard (:3000) logs:
+     * Classification: "💉 SQLi · UNION Data Leak Probe"
+     * Database: "🟠 honeypot.db / Canary Store"
+     * Risk Score: 70 (CRITICAL)
+     * Action: "302 Honeypot Redirect"
+
+---
+
+7. DESTRUCTIVE SQL INJECTION (DROP TABLE ATTEMPT)
+   URL to paste:
+   http://127.0.0.1:5200/?q=notebook'; DROP TABLE public_catalog;--
+
+   Expected Result:
+   - HTTP 302 Redirect to Honeypot (:5300)
+   - Real database table public_catalog remains 100% undamaged
+   - SOC Dashboard (:3000) logs:
+     * Classification: "💉 SQLi · Destructive Drop/Delete"
+     * Database: "🟠 honeypot.db / Canary Store"
+     * Risk Score: 75 (CRITICAL)
+     * Action: "302 Honeypot Redirect"
+
+---
+
+8. CROSS-SITE SCRIPTING (XSS SCRIPT TAG INJECTION)
+   URL to paste:
+   http://127.0.0.1:5200/?q=<script>alert('pwned')</script>
+
+   Expected Result:
+   - HTTP 302 Redirect to Honeypot (:5300)
+   - Script never executes on Storefront
+   - SOC Dashboard (:3000) logs:
+     * Classification: "⚡ Cross-Site Scripting (XSS)"
+     * Database: "🟠 honeypot.db / Canary Store"
+     * Risk Score: 50 (SUSPICIOUS)
+     * Action: "302 Honeypot Redirect"
+
+---
+
+9. XSS EVENT HANDLER INJECTION (COOKIE STEALER ATTEMPT)
+   URL to paste:
+   http://127.0.0.1:5200/?q=<img src=x onerror=alert(document.cookie)>
+
+   Expected Result:
+   - HTTP 302 Redirect to Honeypot (:5300)
+   - SOC Dashboard (:3000) logs:
+     * Classification: "⚡ Cross-Site Scripting (XSS)"
+     * Database: "🟠 honeypot.db / Canary Store"
+     * Risk Score: 40 (SUSPICIOUS)
+     * Action: "302 Honeypot Redirect"
+
+---
+
+10. TIME-BASED BLIND SQLi (DELAY FINGERPRINTING)
+   URL to paste:
+   http://127.0.0.1:5200/?q=notebook' AND (SELECT sleep(5))--
+
+   Expected Result:
+   - HTTP 302 Redirect to Honeypot (:5300) with zero thread hang
+   - SOC Dashboard (:3000) logs:
+     * Classification: "💉 SQLi · Blind Delay Fingerprint"
+     * Database: "🟠 honeypot.db / Canary Store"
+     * Risk Score: 70 (CRITICAL)
+     * Action: "302 Honeypot Redirect"
+
+--------------------------------------------------------------------------------
+[STEP 4] COMMANDS & URLS TO VIEW DATABASE RECORDS & TABLES (PROVE REAL DB IS USED)
+--------------------------------------------------------------------------------
+Judges often ask: "Is there a real database behind this, or is it just mock text?"
+Use any of these methods to prove real databases are actively powering the system:
+
+================================================================================
+METHOD A: BROWSER URLS TO VIEW DATABASE RECORDS & LIVE TABLES
+================================================================================
+
+1. Master Visual Database Comparison (RECOMMENDED FOR JUDGES):
+   URL: http://127.0.0.1:3000/api/db/inspect
+   * Shows side-by-side formatted tables for:
+     - production.db (Real users: Jordan Lee, Sam Rivera; Real catalog products)
+     - honeypot.db (Decoy users: Morgan Vale, Riley Chen; Decoy financial accounts)
+     - Dynamic Synthetic Honeytokens (In-memory canary datasets with CANARY-USR-XXXX)
+
+2. Raw JSON Database Inspection Endpoint:
+   URL: http://127.0.0.1:3000/api/db/inspect?format=json
+   * Returns complete JSON dump of all tables and active canary datasets.
+
+3. Live Persistent Audit Events in SQLite:
+   URL: http://127.0.0.1:3000/api/events
+   * Returns all durable audit records from production.db (table telemetry_events).
+
+4. Decoy Database Explorer (Honeypot Web UI):
+   URL: http://127.0.0.1:5300/
+   * Shows the internal database explorer populated with decoy & canary records.
+
+5. Legitimate Storefront Product Catalog:
+   URL: http://127.0.0.1:5200/
+   * Shows the public catalog rendered live from production.db.
+
+================================================================================
+METHOD B: FAST TERMINAL COMMANDS TO VIEW DATABASE RECORDS
+================================================================================
+
+1. Beautiful ASCII Table Inspector (Single Command - All DBs):
+   python scripts/view_databases.py
+
+2. View Real Production Database Records (Users & Catalog):
+   python -c "import sqlite3; db=sqlite3.connect('data/production.db'); print('\n--- USERS (production.db) ---'); [print(dict(zip(['id','name','email','role'], r))) for r in db.execute('SELECT * FROM users').fetchall()]; print('\n--- CATALOG (production.db) ---'); [print(dict(zip(['id','item','category','price'], r))) for r in db.execute('SELECT * FROM public_catalog').fetchall()]"
+
+3. View Honeypot Decoy Records (Decoy Users & Decoy Balances):
+   python -c "import sqlite3; db=sqlite3.connect('data/honeypot.db'); print('\n--- DECOY USERS (honeypot.db) ---'); [print(dict(zip(['id','name','email','role'], r))) for r in db.execute('SELECT * FROM users').fetchall()]; print('\n--- DECOY FINANCES (honeypot.db) ---'); [print(dict(zip(['id','account','balance','currency'], r))) for r in db.execute('SELECT * FROM financial_records').fetchall()]"
+
+4. View Live SOC Audit Events Stored in SQLite (telemetry_events):
+   python -c "import sqlite3; db=sqlite3.connect('data/production.db'); print('\n--- LATEST AUDIT EVENTS (production.db) ---'); [print(f'[{r[0]}] IP: {r[1]} | Query: {r[2]} | Threat: {r[3]} | Risk: {r[4]} | Route: {r[5]}') for r in db.execute('SELECT timestamp, ip, query, threats, risk, route FROM telemetry_events ORDER BY id DESC LIMIT 5').fetchall()]"
+
+================================================================================
+METHOD C: DIRECT SQLITE CLI COMMANDS (FOR TECHNICAL JUDGES)
+================================================================================
+
+1. Check Real Production DB (production.db):
+   sqlite3 data/production.db ".tables"
+   sqlite3 data/production.db "SELECT * FROM users;"
+   sqlite3 data/production.db "SELECT * FROM public_catalog;"
+   sqlite3 data/production.db "SELECT count(*) AS total_audit_logs FROM telemetry_events;"
+
+2. Check Decoy Honeypot DB (honeypot.db):
+   sqlite3 data/honeypot.db ".tables"
+   sqlite3 data/honeypot.db "SELECT * FROM users;"
+   sqlite3 data/honeypot.db "SELECT * FROM financial_records;"
+
+================================================================================
+METHOD D: CURL COMMANDS (TERMINAL REST API VERIFICATION)
+================================================================================
+
+1. Curl DB Inspection API (Authenticated):
+   curl -s -u admin:sentinel_sec_2026 http://127.0.0.1:3000/api/db/inspect | python -m json.tool
+
+2. Curl SOC Telemetry Events API (Authenticated):
+   curl -s -u admin:sentinel_sec_2026 http://127.0.0.1:3000/api/events | python -m json.tool
+
+================================================================================
+METHOD E: VERIFY DEVSECOPS HARDENING & SECURITY ARCHITECTURE
+================================================================================
+
+1. Test SOC Dashboard Authentication Enforcement (Port 5100):
+   # Unauthenticated access -> 401 Unauthorized
+   curl.exe -s -o NUL -w "Unauthenticated Status: %{http_code}\n" http://127.0.0.1:3000/
+   # Authenticated access with Basic Auth (admin / sentinel_sec_2026) -> 200 OK
+   curl.exe -s -o NUL -w "Basic Auth Status: %{http_code}\n" -u admin:sentinel_sec_2026 http://127.0.0.1:3000/
+   # Authenticated access with Security Token -> 200 OK
+   curl.exe -s -o NUL -w "Security Token Status: %{http_code}\n" "http://127.0.0.1:3000/?token=soc_token_live_2026"
+
+2. Test Honeypot Rate Limiting (Flask-Limiter 50 req/min threshold):
+   # Sends 50 requests then catches the 51st request blocked with HTTP 429 Too Many Requests:
+   python -c "import urllib.request, urllib.error; [urllib.request.urlopen('http://127.0.0.1:5300/api/decoy/records') for _ in range(50)]; print('50 requests passed within limit.'); (lambda: [None for _ in [0] if False])(); (lambda: None)(); (lambda: exec(\"try:\n urllib.request.urlopen('http://127.0.0.1:5300/api/decoy/records')\nexcept urllib.error.HTTPError as e:\n print(f'51st request dropped: {e.code} {e.reason} (Rate limit enforced!)')\"))()"
+
+3. Inspect Pre-Computed Honeytoken Startup Cache (Argon2id & RSA in-memory):
+   python -c "import backend.synthetic_data as sd; print('Honeytoken Cache Initialized:', sd.is_cache_warmed()); print('Cached Decoy Pools:', sd.get_cache_stats())"
+
+4. Run Dedicated Hardening Security Tests:
+   python -m unittest tests/test_hardening.py -v
+
+--------------------------------------------------------------------------------
+[STEP 5] BACKUP COMMANDS (INSTANT AUTOMATED TERMINAL DEMO & TESTS)
+--------------------------------------------------------------------------------
+
+1. Run automated terminal demo (shows 6 full steps in 2 seconds):
+   python scripts/demo_showcase.py
+
+2. Run automated test suite (36 tests verifying architecture & security):
+   python -m unittest discover -s tests -v
+
+3. Run Modern React 18 + TypeScript + Tailwind Frontend Suite:
+   cd frontend-react
+   npm run dev
+   # Open http://localhost:3000/ in browser for unified React interface
+
+--------------------------------------------------------------------------------
+[STEP 6] STOPPING THE PROJECT
+--------------------------------------------------------------------------------
+Press Ctrl+C in the terminal running `python run.py`, OR run:
+
+   powershell.exe -ExecutionPolicy Bypass -File .\stop_demo.ps1
+================================================================================

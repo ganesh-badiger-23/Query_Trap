@@ -1,0 +1,321 @@
+<!-- Mirrored from frontend/templates/portal.html -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#1a382b">
+  <title>Harbor &amp; Pine · Artisanal Workspace Supply &amp; Studio Goods</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/portal.css">
+  <script>
+    window.SENTINEL_CONFIG = {
+      sentinelUrl: "{{ sentinel_url }}",
+      storefrontUrl: "{{ storefront_url }}",
+      replicaUrl: "{{ honeypot_url }}",
+      isUnified: {{ 'true' if is_unified else 'false' }},
+      serviceRole: "{{ service_role }}"
+    };
+    window.PORTAL_INITIAL = {
+      query: {{ initial_query | tojson if initial_query is defined and initial_query else 'null' }},
+      rows:  {{ initial_rows  | tojson if initial_rows  is defined and initial_rows  else 'null' }},
+      searched: {{ 'true' if initial_searched is defined and initial_searched else 'false' }}
+    };
+  </script>
+</head>
+<body>
+  <!-- ══ ANNOUNCEMENT BAR ════════════════════════════════════════════════ -->
+  <div class="announcement-bar">
+    <div class="announcement-inner">
+      <span>✦ Complimentary carbon-neutral express shipping on studio orders over $75</span>
+      <span class="announcement-right">30-Day Home Trial · Worldwide Delivery</span>
+    </div>
+  </div>
+
+  <!-- ══ MAIN NAVIGATION ════════════════════════════════════════════════ -->
+  <header class="shop-nav">
+    <div class="nav-container">
+      <a class="shop-brand" href="{{ storefront_url }}">
+        <div class="brand-glyph">✳</div>
+        <div class="brand-text">
+          <b>HARBOR <i>&amp;</i> PINE</b>
+          <small>STUDIO GOODS · EST. 2021</small>
+        </div>
+      </a>
+
+      <nav class="nav-links">
+        <a class="nav-link active" href="{{ storefront_url }}">Shop All</a>
+        <a class="nav-link" href="?q=stationery">Stationery</a>
+        <a class="nav-link" href="?q=lighting">Lighting</a>
+        <a class="nav-link" href="?q=workspace">Workspace</a>
+        <a class="nav-link" href="#story">Our Story</a>
+      </nav>
+
+      <!-- Integrated Header Search Bar -->
+      <form id="headerSearchForm" class="header-search-form" action="{{ storefront_url }}" method="GET">
+        <span class="search-icon">🔍</span>
+        <input 
+          id="headerSearchInput" 
+          name="q" 
+          type="search" 
+          placeholder="Search catalog (e.g. notebook, lamp)..." 
+          value="{{ initial_query if initial_query is defined and initial_query else '' }}"
+          autocomplete="off"
+        >
+        <button type="submit" aria-label="Submit Search">→</button>
+      </form>
+
+      <div class="shop-actions">
+        <span class="action-item"><span class="action-icon">♙</span> <span class="action-label">Account</span></span>
+        <button class="bag-button" id="bagBtn" aria-label="Shopping Bag">
+          <span class="bag-icon">🛍️</span>
+          <span>Bag</span>
+          <b id="bagCount" class="bag-count">0</b>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- ══ VIBRANT HERO SECTION ═════════════════════════════════════════ -->
+    <section class="hero-section">
+      <div class="hero-content">
+        <div class="hero-tag">
+          <span class="pulse-dot"></span>
+          NEW AUTUMN / WINTER STUDIO COLLECTION
+        </div>
+        <h1 class="hero-title">
+          Considered objects for <em>everyday focus.</em>
+        </h1>
+        <p class="hero-subtitle">
+          Hand-bound cotton paper, solid brushed brass lighting, and tactile workspace essentials engineered to bring calm and craft to your desk.
+        </p>
+
+        <!-- Prominent Search Bar In Hero -->
+        <div class="hero-search-wrapper">
+          <form id="searchForm" class="hero-search-form" action="{{ storefront_url }}" method="GET">
+            <div class="search-input-box">
+              <span class="input-lens">⌕</span>
+              <input 
+                id="searchQuery" 
+                name="q" 
+                type="search" 
+                maxlength="120" 
+                placeholder="Search products, materials, or categories..." 
+                value="{{ initial_query if initial_query is defined and initial_query else '' }}"
+                autocomplete="off"
+              >
+              <button type="submit" class="search-submit-btn">
+                <span>Find Objects</span>
+                <span class="btn-arrow">→</span>
+              </button>
+            </div>
+          </form>
+
+          <!-- Genuine E-Commerce Quick Filter Suggestions -->
+          <div class="quick-tags">
+            <span class="tag-label">Popular searches:</span>
+            <a class="quick-chip" href="?q=notebook">Field Notebooks</a>
+            <a class="quick-chip" href="?q=lamp">Desk Lamps</a>
+            <a class="quick-chip" href="?q=pen">Brass Pens</a>
+            <a class="quick-chip" href="?q=leather">Leather Mats</a>
+            <a class="quick-chip" href="?q=stationery">Stationery</a>
+          </div>
+        </div>
+
+        <div class="hero-perks">
+          <span>✓ Handcrafted in small batches</span>
+          <span>✓ Plastic-free packaging</span>
+          <span>✓ Lifetime repair guarantee</span>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <div class="visual-card-backdrop"></div>
+        <div class="visual-card">
+          <div class="product-badge">FEATURED OBJECT</div>
+          <div class="card-artwork notebook-artwork">
+            <div class="book-spine"></div>
+            <div class="book-cover">
+              <span class="book-stamp">H · P</span>
+              <div class="book-title">FIELD NOTES<small>EDITION NO. 04</small></div>
+              <span class="book-pages">192 PAGES · A5 GRID</span>
+            </div>
+          </div>
+          <div class="card-meta">
+            <div>
+              <h3>Field Notebook (Grid A5)</h3>
+              <p>Recycled 120gsm cotton paper · Lay-flat binding</p>
+            </div>
+            <span class="card-price">$18.00</span>
+          </div>
+          <button class="add-button hero-add" data-item="Field notebook (Grid A5)" data-price="18.00">
+            Add to Bag <span>+</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ SEARCH RESULTS / PRODUCT CATALOG ═════════════════════════════ -->
+    <section id="collection" class="collection-section">
+      <div class="collection-header">
+        <div>
+          <span class="section-eyebrow">CURATED CATALOG</span>
+          {% if initial_searched and initial_query %}
+            <h2 class="section-title">Search Results for <span class="highlight-query">"{{ initial_query }}"</span></h2>
+            <p class="section-subtitle">Showing {{ products|length if products is defined else 0 }} items matching your criteria.</p>
+          {% else %}
+            <h2 class="section-title">The Workspace Collection</h2>
+            <p class="section-subtitle">Tactile tools and quiet objects designed for focused, everyday rituals.</p>
+          {% endif %}
+        </div>
+
+        {% if initial_searched and initial_query %}
+          <a class="clear-search-btn" href="{{ storefront_url }}">✕ Clear search filter</a>
+        {% else %}
+          <div class="catalog-filters">
+            <span class="filter-chip active">All Items</span>
+            <a class="filter-chip" href="?q=stationery">Stationery</a>
+            <a class="filter-chip" href="?q=lighting">Lighting</a>
+            <a class="filter-chip" href="?q=workspace">Workspace</a>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- In-Page Live Search Results Container -->
+      <div id="searchResult" class="search-result-panel {{ '' if initial_searched and initial_rows is defined and initial_rows else 'hidden' }}" aria-live="polite">
+        <!-- Rendered dynamically by portal.js or populated server-side -->
+      </div>
+
+      <!-- Main Product Grid -->
+      <div class="products-grid" id="productsGrid">
+        {% if products is defined and products %}
+          {% for p in products %}
+            <article class="product-card" data-category="{{ p.category }}">
+              <div class="card-image-wrap">
+                <span class="stock-badge">
+                  {% if p.price > 80 %}PREMIUM CRAFT{% elif p.price < 25 %}BESTSELLER{% else %}STUDIO FAVORITE{% endif %}
+                </span>
+                <div class="product-art-preview {{ p.category|lower }}">
+                  <div class="art-icon-circle">
+                    {% if 'notebook' in p.item|lower %}📓
+                    {% elif 'lamp' in p.item|lower %}💡
+                    {% elif 'mug' in p.item|lower %}☕
+                    {% elif 'pen' in p.item|lower %}✒️
+                    {% elif 'leather' in p.item|lower %}💼
+                    {% elif 'organizer' in p.item|lower %}🗂️
+                    {% elif 'sleeve' in p.item|lower %}💻
+                    {% elif 'riser' in p.item|lower %}🖥️
+                    {% else %}📦{% endif %}
+                  </div>
+                </div>
+              </div>
+              <div class="product-info">
+                <div class="product-category-row">
+                  <span class="product-cat">{{ p.category }}</span>
+                  <span class="product-rating">★★★★★ <small>(4.9)</small></span>
+                </div>
+                <h3 class="product-name">{{ p.item }}</h3>
+                <div class="product-footer">
+                  <span class="product-price">${{ "%.2f"|format(p.price) }}</span>
+                  <button class="add-button" data-item="{{ p.item }}" data-price="{{ p.price }}">
+                    Add to Bag <span>+</span>
+                  </button>
+                </div>
+              </div>
+            </article>
+          {% endfor %}
+        {% else %}
+          <article class="product-card">
+            <div class="card-image-wrap">
+              <span class="stock-badge">BESTSELLER</span>
+              <div class="product-art-preview stationery">
+                <div class="art-icon-circle">📓</div>
+              </div>
+            </div>
+            <div class="product-info">
+              <div class="product-category-row"><span class="product-cat">Stationery</span><span class="product-rating">★★★★★ (4.9)</span></div>
+              <h3 class="product-name">Field notebook (Grid A5)</h3>
+              <div class="product-footer">
+                <span class="product-price">$18.00</span>
+                <button class="add-button" data-item="Field notebook" data-price="18.00">Add to Bag <span>+</span></button>
+              </div>
+            </div>
+          </article>
+        {% endif %}
+      </div>
+    </section>
+
+    <!-- ══ STUDIO PHILOSOPHY / ABOUT ════════════════════════════════════ -->
+    <section id="story" class="philosophy-section">
+      <div class="philosophy-inner">
+        <div class="philosophy-badge">CRAFTED FOR PURPOSE</div>
+        <h2>Objects that honor the quiet craft of everyday work.</h2>
+        <p>
+          We believe the physical environment we build around ourselves shapes how we think and create. 
+          Every notebook, desk lamp, and stoneware piece is forged in dialogue with independent artisans across Japan, Scandinavia, and New England.
+        </p>
+        <div class="values-row">
+          <div class="value-item">
+            <span class="value-icon">🌿</span>
+            <b>Sustainably Harvested</b>
+            <small>FSC-certified cedar, recycled cotton fibers, and vegetable-tanned hides.</small>
+          </div>
+          <div class="value-item">
+            <span class="value-icon">⚖️</span>
+            <b>Built for Longevity</b>
+            <small>Solid-cast unlacquered brass and heavyweight ceramic intended to patinate beautifully.</small>
+          </div>
+          <div class="value-item">
+            <span class="value-icon">📦</span>
+            <b>Carbon-Neutral Courier</b>
+            <small>Every delivery is 100% offset through certified reforestation initiatives.</small>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ══ E-COMMERCE FOOTER ══════════════════════════════════════════════ -->
+  <footer class="shop-footer">
+    <div class="footer-container">
+      <div class="footer-col brand-col">
+        <div class="brand-text">
+          <b>HARBOR <i>&amp;</i> PINE</b>
+          <p>Thoughtful tools, stationery, and tactile workspace objects crafted to outlive the season.</p>
+        </div>
+        <span class="copyright">© 2026 Harbor &amp; Pine Studio Goods Co. All rights reserved.</span>
+      </div>
+      <div class="footer-col">
+        <h4>Studio Collection</h4>
+        <a href="?q=stationery">Handmade Stationery</a>
+        <a href="?q=lighting">Brass Desk Lighting</a>
+        <a href="?q=workspace">Leather Organizers</a>
+        <a href="?q=pen">Fountain Pens &amp; Inks</a>
+      </div>
+      <div class="footer-col">
+        <h4>Customer Care</h4>
+        <a href="#shipping">Shipping &amp; Delivery</a>
+        <a href="#returns">30-Day Returns</a>
+        <a href="#warranty">Lifetime Guarantee</a>
+        <a href="#contact">Studio Concierge</a>
+      </div>
+      <div class="footer-col newsletter-col">
+        <h4>The Journal</h4>
+        <p>Subscribe for quiet reflections on craftsmanship, new product releases, and studio notes.</p>
+        <div class="newsletter-input">
+          <input type="email" placeholder="Enter your email address" autocomplete="email">
+          <button type="button">Join →</button>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast Notification Container -->
+  <div id="portalToast" class="portal-toast" aria-live="assertive"></div>
+
+  <script src="/static/portal.js"></script>
+</body>
+</html>

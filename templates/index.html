@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a1018">
+  <title>Sentinel DB · Intrusion Defense</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+  <script>
+    window.SENTINEL_CONFIG = {
+      sentinelUrl: "{{ sentinel_url }}",
+      storefrontUrl: "{{ storefront_url }}",
+      honeypotUrl: "{{ honeypot_url }}",
+      isUnified: {{ 'true' if is_unified else 'false' }},
+      serviceRole: "{{ service_role }}",
+      authToken: "{{ soc_token }}"
+    };
+  </script>
+</head>
+
+<body>
+  <aside class="sidebar">
+    <a class="brand" href="#"><span class="brand-mark"><svg viewBox="0 0 24 24" fill="none">
+          <path d="M12 3 20 6v5c0 5-3.4 8.4-8 10-4.6-1.6-8-5-8-10V6l8-3Z" stroke="currentColor" stroke-width="1.7" />
+          <path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"
+            stroke-linejoin="round" />
+        </svg></span><span>SENTINEL<span class="brand-sub">DB SECURITY</span></span></a>
+    <div class="nav-caption">OPERATIONS</div><a class="nav-item active" href="#overview"><span
+        class="nav-icon">◫</span>Overview</a><a class="nav-item" href="#inspector"><span class="nav-icon">⌕</span>Query
+      inspector</a><a class="nav-item" href="#telemetry"><span class="nav-icon">⌁</span>Telemetry</a>
+    <div class="sidebar-bottom">
+      <div class="environment"><span class="status-dot"></span>
+        <div><b>LOCAL DEMO</b><small>Isolated environment</small></div><span class="chevron">⌄</span>
+      </div>
+      <div class="user-card">
+        <div class="avatar">SA</div>
+        <div><b>Security analyst</b><small>Demo workspace</small></div><span class="more">···</span>
+      </div>
+    </div>
+  </aside>
+  <main class="main">
+    <header class="topbar">
+      <div class="breadcrumbs">Security operations <span>/</span> <b>Overview</b></div>
+      <div class="top-right"><span class="live-pill"><i></i> LIVE MONITORING</span><span class="top-divider"></span>
+        <div class="top-date" id="clock">--:--:-- UTC</div><button class="icon-button" aria-label="Notifications">♧<i
+            class="notify-dot"></i></button>
+      </div>
+    </header>
+    <section class="content" id="overview">
+      <div class="page-heading">
+        <div>
+          <div class="eyebrow"><span class="eyebrow-line"></span> THREAT INTELLIGENCE</div>
+          <h1>Security overview</h1>
+          <p>Real-time visibility into database activity and threat response · Sentinel :3000</p>
+        </div>
+        <div class="heading-actions"><span class="time-select"><span class="calendar-icon">▦</span> Live session <span
+              class="chevron">⌄</span></span><a class="button-secondary portal-launch" href="{{ storefront_url }}"
+            target="_blank" rel="noopener">↗ <span>Open demo portal</span></a><button id="clearBtn"
+            class="button-secondary">↻ <span>Clear session</span></button></div>
+      </div>
+      <div class="stats-grid">
+        <article class="stat-card">
+          <div class="stat-top"><span>Total queries analyzed</span><span class="stat-icon cyan">⌕</span></div>
+          <div class="stat-value" id="totalCount">0</div>
+          <div class="stat-foot"><span class="foot-live"><i></i> Live session</span><span>since page load</span></div>
+          <div class="sparkline cyan-line"><svg viewBox="0 0 130 34" preserveAspectRatio="none">
+              <path d="M1 27 C15 24 18 29 30 21S47 25 58 15 72 19 84 13 100 21 112 9 122 13 129 4" />
+            </svg></div>
+        </article>
+        <article class="stat-card">
+          <div class="stat-top"><span>Product searches (safe)</span><span class="stat-icon cyan">🛍️</span></div>
+          <div class="stat-value" id="productCount">0</div>
+          <div class="stat-foot"><span class="foot-live" style="color:#5eead4;"><i></i> Legitimate shoppers</span></div>
+          <div class="sparkline cyan-line"><svg viewBox="0 0 130 34" preserveAspectRatio="none">
+              <path d="M1 22 C15 18 25 24 38 16S55 19 68 12 85 18 95 10 110 16 122 8 129 4" />
+            </svg></div>
+        </article>
+        <article class="stat-card">
+          <div class="stat-top"><span>Threats detected</span><span class="stat-icon amber">⌁</span></div>
+          <div class="stat-value" id="threatCount">0</div>
+          <div class="stat-foot"><span class="foot-warn"><i></i> Suspicious + critical</span></div>
+          <div class="sparkline amber-line"><svg viewBox="0 0 130 34" preserveAspectRatio="none">
+              <path d="M1 29 C15 28 18 17 30 23S47 13 58 18 72 8 84 15 100 5 112 12 122 7 129 3" />
+            </svg></div>
+        </article>
+        <article class="stat-card">
+          <div class="stat-top"><span>Honeypot diversions</span><span class="stat-icon rose">⌑</span></div>
+          <div class="stat-value" id="honeypotCount">0</div>
+          <div class="stat-foot"><span class="foot-rose"><i></i> Attacker contained</span></div>
+          <div class="sparkline rose-line"><svg viewBox="0 0 130 34" preserveAspectRatio="none">
+              <path d="M1 30 C15 29 18 23 30 26S47 21 58 24 72 17 84 20 100 12 112 15 122 6 129 3" />
+            </svg></div>
+        </article>
+        <article class="stat-card">
+          <div class="stat-top"><span>Mean risk score</span><span class="stat-icon violet">◈</span></div>
+          <div class="stat-value"><span id="meanRisk">0</span><small class="value-unit">/ 100</small></div>
+          <div class="stat-foot"><span class="foot-neutral">Across analyzed queries</span></div>
+          <div class="risk-meter"><span id="riskMeter"></span></div>
+        </article>
+      </div>
+      <div class="dashboard-grid">
+        <article class="panel risk-panel">
+          <div class="panel-head">
+            <div>
+              <h2>Risk score activity</h2>
+              <p>Threat score by query · last 30 events</p>
+            </div><span class="panel-live"><i></i> LIVE</span>
+          </div>
+          <div class="chart-wrap"><canvas id="riskChart" aria-label="Risk score line chart"></canvas>
+            <div id="emptyChart" class="empty-chart"><span>⌁</span><b>Waiting for query activity</b><small>Submit a
+                query to start the live risk stream</small></div>
+          </div>
+          <div class="chart-legend"><span><i class="legend-safe"></i>Safe <small>0–30</small></span><span><i
+                class="legend-suspicious"></i>Suspicious <small>31–69</small></span><span><i
+                class="legend-critical"></i>Critical <small>70–100</small></span><span style="color:#dce5ed;font-weight:500;"><i
+                class="legend-redirect"></i>Honeypot Redirection <small>(HTTP 302)</small></span></div>
+        </article>
+        <article class="panel distribution-panel">
+          <div class="panel-head">
+            <div>
+              <h2>Threat distribution</h2>
+              <p>Routing breakdown · current session</p>
+            </div><button class="dots-button" aria-label="More options">···</button>
+          </div>
+          <div class="donut-wrap"><canvas id="distributionChart"
+              aria-label="Threat distribution doughnut chart"></canvas>
+            <div class="donut-center"><b id="donutTotal">0</b><span>QUERIES</span></div>
+          </div>
+          <div class="distribution-legend">
+            <div><span class="distribution-label"><i class="legend-safe"></i>Safe</span><b id="safePct">0%</b></div>
+            <div><span class="distribution-label"><i class="legend-suspicious"></i>Suspicious</span><b
+                id="suspiciousPct">0%</b></div>
+            <div><span class="distribution-label"><i class="legend-critical"></i>Honeypot</span><b
+                id="honeypotPct">0%</b></div>
+          </div>
+        </article>
+      </div>
+      <section id="inspector" class="panel inspector-panel">
+        <div class="panel-head inspector-head">
+          <div>
+            <div class="section-title"><span class="terminal-icon">⌘</span>
+              <div>
+                <h2>Query inspector</h2>
+                <p>Submit a payload to evaluate its risk and routing decision.</p>
+              </div>
+            </div>
+          </div><span class="engine-badge"><i></i> DETECTION ENGINE ACTIVE</span>
+        </div>
+        <form id="queryForm"><label class="input-label" for="siteContext">WEBSITE / RESOURCE CONTEXT</label>
+          <div class="context-row"><span class="context-icon">↗</span><input id="siteContext" name="site_context"
+              maxlength="300" autocomplete="url" value="{{ storefront_url }}"
+              placeholder="https://your-website.example/path"></div><label class="input-label query-label"
+            for="queryInput">QUERY OR PAYLOAD</label>
+          <div class="input-row">
+            <div class="input-prefix">&gt;_</div><input id="queryInput" name="query" maxlength="2000" autocomplete="off"
+              placeholder="Try: SELECT * FROM users WHERE id = 1" required><button class="button-primary"
+              type="submit"><span>Analyze query</span><span class="arrow">→</span></button>
+          </div>
+          <div class="input-bottom"><span><i class="lock-icon">▣</i> Payload is analyzed as untrusted text; arbitrary
+              SQL is never executed.</span><span id="charCount">0 / 2000</span></div>
+          <div class="quick-payloads"><span>TRY A SCENARIO</span><button type="button"
+              data-payload="SELECT * FROM public_catalog">Safe lookup</button><button type="button"
+              data-payload="SELECT * FROM users WHERE name = 'x' OR '1'='1'">SQL injection</button><button type="button"
+              data-payload="SELECT * FROM users; DROP TABLE users; --">Destructive SQLi</button><button type="button"
+              data-payload="<script>alert('xss')</script> SELECT * FROM public_catalog">XSS payload</button></div>
+        </form>
+      </section>
+      <section id="resultPanel" class="result-panel hidden" aria-live="polite">
+        <div class="result-heading">
+          <div><span class="result-kicker">INSPECTION RESULT</span>
+            <h2 id="resultTitle">Analysis complete</h2>
+          </div><button id="closeResult" class="close-result" aria-label="Dismiss result">×</button>
+        </div>
+        <div class="result-body">
+          <div class="result-score"><span>RISK SCORE</span><b id="resultRisk">0</b>
+            <div class="result-track"><i id="resultTrack"></i></div><small id="resultRoute"></small>
+          </div>
+          <div class="result-detail">
+            <div><span>DETECTED VECTORS</span><b id="resultThreats">None detected</b></div>
+            <div><span>DEMO DATA SOURCE</span><b id="resultSource">—</b></div>
+            <div><span>SAFE EXECUTION</span><b>Fixed parameterized lookup</b></div>
+          </div>
+        </div>
+        <pre id="resultRows" class="result-rows"></pre>
+      </section>
+      <section id="telemetry" class="panel telemetry-panel">
+        <div class="panel-head telemetry-head">
+          <div>
+            <h2>Live Telemetry &amp; Database Usage Audit</h2>
+            <p>Real-time audit stream of store product searches, intercepted injection attacks, and database routing actions.</p>
+          </div>
+          <div class="table-actions">
+            <span class="event-count"><i></i><b id="eventCount">0</b> EVENTS</span>
+            <button id="exportJsonBtn" class="button-secondary" style="height:26px; font-size:10px; padding:0 8px;" title="Export telemetry as JSON">⬇ Export JSON</button>
+          </div>
+        </div>
+
+        <!-- TELEMETRY ANALYSIS TOOLBAR -->
+        <div class="telemetry-toolbar">
+          <div class="telemetry-filters" id="filterTabs">
+            <button class="filter-btn active" data-filter="all">All Queries (<span id="countAll">0</span>)</button>
+            <button class="filter-btn" data-filter="products">🛍️ Product Searches (<span id="countProducts">0</span>)</button>
+            <button class="filter-btn" data-filter="attacks">🚨 Attacks Diverted (<span id="countAttacks">0</span>)</button>
+            <button class="filter-btn" data-filter="sqli">💉 SQL Injection (<span id="countSqli">0</span>)</button>
+            <button class="filter-btn" data-filter="port">🛡️ Port Probes (<span id="countPort">0</span>)</button>
+            <button class="filter-btn" data-filter="xss">⚡ XSS (<span id="countXss">0</span>)</button>
+          </div>
+          <div class="telemetry-search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="telemetrySearch" placeholder="Filter by product (e.g. notebook), IP, query, or threat...">
+            <button id="clearSearch" class="clear-search-btn" title="Clear filter">×</button>
+          </div>
+        </div>
+
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>TIME</th>
+                <th>CLIENT IP</th>
+                <th>QUERY / SEARCH TERM</th>
+                <th>QUERY CLASSIFICATION</th>
+                <th>DATABASE ACCESSED</th>
+                <th>RISK</th>
+                <th>DEFENSE ACTION</th>
+              </tr>
+            </thead>
+            <tbody id="eventRows">
+              <tr class="empty-row">
+                <td colspan="7"><span class="empty-symbol">⌁</span><b>No query activity yet</b><small>Analyzed requests
+                    will appear here in real time.</small></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="table-footer"><span id="tableStatus"><i></i> Listening for incoming events</span><span id="filterStatus">Showing all events</span></div>
+      </section>
+      <footer><span><i></i> Detection engine operational</span><span>DEMO ENVIRONMENT · Synthetic data
+          only</span><span>Sentinel DB <b>v1.0.0</b></span></footer>
+    </section>
+  </main>
+  <div id="toast" class="toast"></div>
+
+  <!-- EVENT DETAIL MODAL -->
+  <div id="eventModal" class="modal-backdrop hidden" aria-modal="true" role="dialog">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div>
+          <span class="result-kicker">SOC AUDIT INSPECTION</span>
+          <h3 id="modalTitle">Event Details</h3>
+        </div>
+        <button id="closeModal" class="close-result" aria-label="Close dialog">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-grid">
+          <div><label>EVENT TIMESTAMP</label><b id="modalTime">—</b></div>
+          <div><label>CLIENT IP</label><b id="modalIp">—</b></div>
+          <div><label>QUERY CLASSIFICATION</label><span id="modalTypeBadge" class="type-badge">—</span></div>
+          <div><label>DATABASE TARGET</label><span id="modalDbTag" class="dbtag">—</span></div>
+          <div><label>RISK EVALUATION</label><span id="modalRiskPill" class="score-pill">—</span></div>
+          <div><label>DEFENSE ROUTE</label><b id="modalRoute">—</b></div>
+        </div>
+        <div class="modal-section">
+          <label>ORIGINAL QUERY / URL PAYLOAD</label>
+          <pre id="modalRawQuery" class="modal-code"></pre>
+        </div>
+        <div class="modal-section">
+          <label>SITE / RESOURCE CONTEXT</label>
+          <div id="modalSiteContext" class="modal-text"></div>
+        </div>
+        <div class="modal-section">
+          <label>DETECTED THREAT SIGNATURES</label>
+          <div id="modalThreats" class="modal-chips"></div>
+        </div>
+        <div class="modal-section">
+          <label>DEFENSE MITIGATION ACTION</label>
+          <div id="modalAction" class="modal-action-box"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="/static/app.js"></script>
+</body>
+
+</html>

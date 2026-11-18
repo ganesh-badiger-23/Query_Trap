@@ -1,0 +1,5 @@
+Flask>=3.0,<4
+Flask-SocketIO>=5.3,<6
+Flask-Limiter>=3.5.0
+simple-websocket>=1.0.0
+gunicorn>=22.0.0; sys_platform != 'win32'

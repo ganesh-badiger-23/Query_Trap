@@ -1,0 +1,12 @@
+"""Production WSGI entrypoint for Query Trap (Sentinel DB)."""
+import os
+from app import app, socketio
+
+# Ensure data directory exists
+os.makedirs(os.environ.get("QUERY_TRAP_DATA", "data"), exist_ok=True)
+
+if __name__ == "__main__":
+    host = os.environ.get("HOST", "0.0.0.0")
+    port = int(os.environ.get("PORT", "5100"))
+    socketio.run(app, host=host, port=port, debug=False)
+

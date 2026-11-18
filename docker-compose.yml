@@ -1,0 +1,77 @@
+services:
+  # Option 1: Unified single-service deployment (Recommended for standard cloud containers)
+  # Dashboard on /, Storefront on /portal, Honeypot on /honeypot
+  query-trap-unified:
+    build: .
+    container_name: query_trap_unified
+    ports:
+      - "5100:5100"
+    environment:
+      - PORT=5100
+      - HOST=0.0.0.0
+      - SERVICE_ROLE=unified
+      - SECRET_KEY=production-secret-change-me
+      - ALLOWED_ORIGINS=*
+    volumes:
+      - query_data:/app/data
+    restart: unless-stopped
+    profiles: ["unified", "default"]
+
+  # Option 2: 3-Service Microservice Deployment (Exact 3-Port Architecture)
+  # Sentinel DB: http://localhost:5100
+  # Storefront:  http://localhost:5200
+  # Honeypot:    http://localhost:5300
+  sentinel:
+    build: .
+    container_name: query_trap_sentinel
+    ports:
+      - "5100:5100"
+    environment:
+      - PORT=5100
+      - HOST=0.0.0.0
+      - SERVICE_ROLE=sentinel
+      - SENTINEL_URL=http://localhost:5100/
+      - STOREFRONT_URL=http://localhost:5200/
+      - HONEYPOT_URL=http://localhost:5300/
+      - ALLOWED_ORIGINS=http://localhost:5200,http://127.0.0.1:5200
+    volumes:
+      - query_data:/app/data
+    restart: unless-stopped
+    profiles: ["multi-service"]
+
+  storefront:
+    build: .
+    container_name: query_trap_storefront
+    ports:
+      - "5200:5200"
+    environment:
+      - PORT=5200
+      - HOST=0.0.0.0
+      - SERVICE_ROLE=storefront
+      - SENTINEL_URL=http://localhost:5100/
+      - STOREFRONT_URL=http://localhost:5200/
+      - HONEYPOT_URL=http://localhost:5300/
+    volumes:
+      - query_data:/app/data
+    restart: unless-stopped
+    profiles: ["multi-service"]
+
+  honeypot:
+    build: .
+    container_name: query_trap_honeypot
+    ports:
+      - "5300:5300"
+    environment:
+      - PORT=5300
+      - HOST=0.0.0.0
+      - SERVICE_ROLE=honeypot
+      - STOREFRONT_URL=http://localhost:5200/
+      - HONEYPOT_URL=http://localhost:5300/
+    volumes:
+      - query_data:/app/data
+    restart: unless-stopped
+    profiles: ["multi-service"]
+
+volumes:
+  query_data:
+

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f3f5f8"><title>Northstar Enterprise · Internal Data Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/honeypot.css">
+  <script>
+    window.SENTINEL_CONFIG = {
+      sentinelUrl: "{{ sentinel_url }}",
+      storefrontUrl: "{{ storefront_url }}",
+      honeypotUrl: "{{ honeypot_url }}",
+      isUnified: {{ 'true' if is_unified else 'false' }},
+      serviceRole: "{{ service_role }}"
+    };
+  </script>
+</head>
+<body>
+  <aside class="hp-sidebar">
+    <a class="hp-brand" href="{{ honeypot_url }}"><span class="hp-mark">N</span><span>NORTHSTAR<small>ENTERPRISE DATA SYSTEMS</small></span></a>
+    <div class="hp-workspace"><span class="workspace-avatar">O</span><span><b>Operations Core</b><small>Primary Node</small></span><span class="hp-chevron">⌄</span></div>
+    <div class="hp-nav-label">WORKSPACE</div>
+    <a class="hp-nav active" href="#records"><span>▤</span>Data explorer</a>
+    <a class="hp-nav" href="#activity"><span>◷</span>Query audit log</a>
+    <div class="hp-sidebar-bottom"><div class="hp-isolated"><i></i><span><b>Internal Network</b><small>Verified cluster</small></span></div><div class="hp-user"><span class="hp-user-avatar">JD</span><span><b>Jordan Davis</b><small>Systems administrator</small></span><span class="hp-chevron">···</span></div></div>
+  </aside>
+  <main class="hp-main">
+    <header class="hp-topbar"><div class="hp-crumb">Operations <span>/</span> Data explorer</div><div class="hp-top-right"><span class="replica-pill"><i></i> SYSTEM: ONLINE · US-EAST-01</span><span class="hp-divider"></span><span class="hp-clock" id="hpClock">--:--</span><span class="hp-avatar-small">JD</span></div></header>
+    <div class="hp-content">
+      <div class="hp-eyebrow"><span></span> ENTERPRISE DATABASE DIRECTORY</div>
+      <div class="hp-heading"><div><h1>Database Record Explorer</h1><p>Internal query results and record catalog.</p></div><div class="hp-heading-actions"><button id="refreshBtn" class="hp-refresh">↻ <span>Refresh</span></button></div></div>
+
+      <div class="hp-banner" id="hpBanner"><span class="banner-icon">🔒</span><span><b>Northstar Enterprise Infrastructure · Internal Data Service</b><small>Authorized Personnel Only · Node: cluster-prod-internal-04</small></span><span class="banner-state"><i></i> Active Session</span></div>
+
+      <section class="hp-query-card"><div class="hp-card-title"><div class="hp-card-icon">⌕</div><div><h2>Database Query Execution</h2><p>SQL query executed successfully against internal records.</p></div><span class="hp-success"><i></i> 200 OK · EXECUTED</span></div><div class="request-box"><div class="request-label"><span>QUERY STATEMENT</span><span id="requestTime">—</span></div><code id="requestText">SELECT * FROM public_catalog LIMIT 50;</code><div class="request-label site-label"><span>CLIENT ORIGIN / GATEWAY ROUTE</span></div><code id="siteContextValue">Internal Gateway Proxy (Client: 127.0.0.1)</code></div></section>
+
+      <!-- Dataset tabs (shown when dynamic tables are available) -->
+      <div id="datasetTabs" class="dataset-tabs hidden">
+        <div class="tabs-label">AVAILABLE DATABASE TABLES &amp; VAULTS</div>
+        <div class="tabs-row">
+          <button class="tab-btn active" data-dataset="users">👤 Users &amp; Identities</button>
+          <button class="tab-btn" data-dataset="financial">💳 Corporate Ledgers &amp; Accounts</button>
+          <button class="tab-btn" data-dataset="secrets">🔑 Cloud Infrastructure Secrets</button>
+          <button class="tab-btn" data-dataset="catalog">📦 Public Catalog &amp; Inventory</button>
+        </div>
+      </div>
+
+      <section id="records" class="hp-data-card"><div class="hp-card-title data-title"><div><h2>Database Records</h2><p id="recordCaption">Active records from selected table.</p></div><button class="hp-filter" id="resetFilter">☷ <span>All records</span></button></div><div class="hp-table-tools"><label class="hp-search"><span>⌕</span><input id="recordSearch" type="search" placeholder="Filter records..." autocomplete="off"></label><span class="hp-hint">Select a row to inspect details</span></div><div class="hp-table-wrap"><table><thead id="tableHead"></thead><tbody id="tableBody"></tbody></table></div><div class="hp-table-footer"><span><i></i> <span id="syncLabel">Data synced just now</span></span><span id="rowCount">0 records</span></div><div id="recordDetail" class="record-detail hidden"><div class="detail-heading"><div><small>RECORD DETAILS</small><b id="detailTitle">Selected record</b></div><button id="closeDetail" aria-label="Close details">×</button></div><div id="detailFields" class="detail-fields"></div></div></section>
+      <section id="activity" class="hp-activity"><div class="activity-icon">✓</div><div><b>Query executed successfully</b><p>The internal data service returned matching records.</p></div><span id="activityTime">Just now</span></section>
+      <footer class="hp-footer"><span>Northstar Data Infrastructure <b>·</b> Regional internal cluster</span><span>Enterprise Support <b>·</b> Documentation</span></footer>
+    </div>
+  </main>
+  <script src="/static/honeypot.js"></script>
+</body>
+</html>
